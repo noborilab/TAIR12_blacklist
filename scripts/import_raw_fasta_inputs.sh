@@ -1,13 +1,22 @@
+#!/bin/bash
+set -euo pipefail
+
+# shellcheck source=../config.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
+
+mkdir -p "$FASTQ_SOURCE"
+cd "$FASTQ_SOURCE"
+
 #inputA
-#fastq-dump SRR8180351
+fastq-dump SRR8180351
 #inputB
-#fastq-dump SRR402844
+fastq-dump SRR402844
 #inputC
-#fastq-dump SRR6042861
+fastq-dump SRR6042861
 #inputD
-#fastq-dump SRR8742331
+fastq-dump SRR8742331
 #inputE
-#fastq-dump SRR5011169
+fastq-dump SRR5011169
 #inputF
 fastq-dump SRR8365023
 #inputG
@@ -40,3 +49,5 @@ fastq-dump SRR5813676
 fastq-dump SRR866865
 #inputT
 fastq-dump SRR1191642
+
+pigz ./*.fastq

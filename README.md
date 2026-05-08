@@ -42,7 +42,7 @@ You need all four: `bwa-0.7.19.img`, `samtools-1.21.img`, `umap-1.1.1.img`, `bla
 
 ### Step 3: Stage inputs
 
-- **FASTQs** — download the ChIP-seq inputs listed in `scripts/import_raw_fasta_inputs.sh` (from Klasfeld et al. 2022) into `$FASTQ_SOURCE` using the [SRA Toolkit](https://github.com/ncbi/sra-tools). The default `FASTQ_SOURCE` points at `/tsl/data/externalData/tnobori/ben/GreenscreenProject`. **Note:** `bwa.sh` merges `SRR7224610/11/12` into `SRR722461X.fastq.gz` inside `$FASTQ_SOURCE` and removes the originals — you must have write access there, or override `FASTQ_SOURCE` to a personal copy.
+- **FASTQs** — run `bash scripts/import_raw_fasta_inputs.sh` to download the ChIP-seq inputs (from Klasfeld et al. 2022) into `$FASTQ_SOURCE` and gzip them. The script `cd`s into `$FASTQ_SOURCE` itself; you need [SRA Toolkit](https://github.com/ncbi/sra-tools) (`fastq-dump`) and `pigz` on `PATH`. The default `FASTQ_SOURCE` points at `/tsl/data/externalData/tnobori/ben/GreenscreenProject`. **Note:** `bwa.sh` merges `SRR7224610/11/12` into `SRR722461X.fastq.gz` inside `$FASTQ_SOURCE` and removes the originals — you must have write access there, or override `FASTQ_SOURCE` to a personal copy.
 - **Genome** — download the TAIR12 assembly from the [TAIR website](https://www.arabidopsis.org), rename chromosomes to UCSC style (`chr1`–`chr5`; the pipeline requires this), and place at `$GENOME_PATH` (default `$WORK_BASE/genome.fa`). Also produce a `chrom.sizes` file at `$CHROM_SIZES` (e.g. via `samtools faidx`).
 
 ### Step 4: Run the pipeline
