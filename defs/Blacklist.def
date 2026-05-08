@@ -1,0 +1,27 @@
+BootStrap: yum
+OSVersion: 9
+MirrorURL: http://yum-repos.hpccluster/AlmaLinux/9/os/$basearch/
+Include: yum
+
+%post
+mkdir -p /opt/software/
+cd /opt/software/
+dnf -y install epel-release
+dnf -y install wget langpacks-en_GB.noarch tar 
+dnf -y install git make gcc g++ zlib-devel cmake
+
+rm -rf blacklist
+git clone --recurse-submodules https://github.com/Boyle-Lab/Blacklist.git
+
+cd Blacklist/bamtools/
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX:PATH="$(cd .. && pwd)/install" ..
+make
+make install
+cd ../..
+sed '469s/200/50/' blacklist.cpp > tmp.cpp
+mv tmp.cpp blacklist.cpp
+make
+
+echo "export PATH=/opt/software/Blacklist/:$PATH" >> $SINGULARITY_ENVIRONMENT

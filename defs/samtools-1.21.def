@@ -1,0 +1,21 @@
+BootStrap: yum
+OSVersion: 9
+MirrorURL: http://yum-repos.hpccluster/AlmaLinux/9/os/$basearch/
+Include: yum
+
+%post
+mkdir -p /opt/software/samtools
+cd /opt/software/
+dnf -y install epel-release
+dnf -y install wget langpacks-en_GB.noarch tar 
+dnf -y install autoconf automake make gcc perl-Data-Dumper zlib-devel bzip2 bzip2-devel xz-devel curl-devel openssl-devel ncurses-devel libdeflate-devel
+
+wget https://github.com/samtools/samtools/releases/download/1.21/samtools-1.21.tar.bz2
+tar xvjf samtools-1.21.tar.bz2
+cd samtools-1.21
+./configure --prefix=/opt/software/samtools
+make
+make install
+
+echo "export PATH=/opt/software/samtools/bin/:$PATH" >> $SINGULARITY_ENVIRONMENT
+

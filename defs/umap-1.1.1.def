@@ -1,0 +1,2 @@
+BootStrap: docker
+From: quay.io/biocontainers/umap:1.1.1--pyh1687a27_0
