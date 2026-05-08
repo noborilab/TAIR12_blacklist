@@ -1,18 +1,17 @@
 #!/bin/bash
-#SBATCH -p tsl-long
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=8G
 #SBATCH -N 1
 #SBATCH -J umap_tair12
 #SBATCH --mail-type=end,fail
-#SBATCH --mail-user=Benjamin.Tremblay@tsl.ac.uk
-#SBATCH --output=/hpc-home/gok24jef/arabidopsis/tair12/blacklist/umap/umap.LOG.txt
-#SBATCH --error=/hpc-home/gok24jef/arabidopsis/tair12/blacklist/umap/umap.ERR.txt
 
 set -exuo pipefail
 
-MAINDIR=/hpc-home/gok24jef/arabidopsis/tair12/blacklist/umap
-IMG=/hpc-home/gok24jef/containers/umap-1.1.1.img
+# shellcheck source=../config.sh
+source "$(dirname "${BASH_SOURCE[0]}")/../config.sh"
+
+MAINDIR="${WORK_BASE}/umap"
+IMG="${CONTAINER_DIR}/umap-1.1.1.img"
 SE() { singularity exec "$IMG" "$@"; }
 
 # Directory containing the bowtie executable inside the container.

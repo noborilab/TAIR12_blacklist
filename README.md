@@ -18,35 +18,47 @@ Here is a quick visualization of the TAIR10 versus TAIR12 blacklist coverage acr
 
 ## Reproducing the blacklist
 
-The following steps are targeted towards members of The Sainsbury Laboratory (TSL) using the NBI HPC, though anyone can modify the scripts so they can run in their own setups. These scripts also assume a specific directory structure, so read the scripts first before executing. They also contain paths specific to my username; be sure to modify them first.
+These steps are targeted towards members of The Sainsbury Laboratory (TSL) using the NBI HPC. Other sites can adapt the same flow by editing `config.sh` and the partition names. The two BED files in the repo root are the published artifact tied to the Zenodo DOI; reproduce only when verifying or moving to a new TAIR assembly.
 
-### Step 1: Create Singularity containers
+### Step 1: Edit `config.sh`
 
-For each script in `defs/`, create containers on the `software` node of the HPC, for example:
+`config.sh` at the repo root is the single source of truth for site- and user-specific paths. At minimum, set:
+
+- `WORK_BASE` — your per-user working tree (e.g. `/hpc-home/$USER/arabidopsis/tair12/blacklist`)
+- `CONTAINER_DIR` — where you keep your Singularity `.img` files
+- `EMAIL` — your TSL email, used for SLURM `--mail-type` notifications
+
+Defaults for `FASTQ_SOURCE`, `GENOME_PATH`, `CHROM_SIZES`, and the two SLURM partitions are set inline; override any of them by editing the file or by exporting the variable before invoking `submit.sh`.
+
+### Step 2: Build Singularity containers
+
+For each definition in `defs/`, build on the `software` node of the HPC into `$CONTAINER_DIR`:
 
 ```
-sudo singularity build container.img container.def
+sudo singularity build $CONTAINER_DIR/container.img defs/container.def
 ```
 
-### Step 2: Download the input datasets
+You need all four: `bwa-0.7.19.img`, `samtools-1.21.img`, `umap-1.1.1.img`, `blacklist.img`.
 
-Navigate to the appropriate folder in `/tsl/data/externalData` on the HPC via the local mount method on your personal computer and run the `import_raw_fasta_inputs.sh` script to download the ChIP-seq inputs using the [SRA Toolkit](https://github.com/ncbi/sra-tools). Since the HPC does not have internet access this is the simplest way to download them in my opinion. This input list is from Klasfeld et al. (2022).
+### Step 3: Stage inputs
 
-### Step 3: Download the TAIR12 sequences
+- **FASTQs** — download the ChIP-seq inputs listed in `scripts/import_raw_fasta_inputs.sh` (from Klasfeld et al. 2022) into `$FASTQ_SOURCE` using the [SRA Toolkit](https://github.com/ncbi/sra-tools). The default `FASTQ_SOURCE` points at `/tsl/data/externalData/tnobori/ben/GreenscreenProject`. **Note:** `bwa.sh` merges `SRR7224610/11/12` into `SRR722461X.fastq.gz` inside `$FASTQ_SOURCE` and removes the originals — you must have write access there, or override `FASTQ_SOURCE` to a personal copy.
+- **Genome** — download the TAIR12 assembly from the [TAIR website](https://www.arabidopsis.org), rename chromosomes to UCSC style (`chr1`–`chr5`; the pipeline requires this), and place at `$GENOME_PATH` (default `$WORK_BASE/genome.fa`). Also produce a `chrom.sizes` file at `$CHROM_SIZES` (e.g. via `samtools faidx`).
 
-Go to the [TAIR website](https://www.arabidopsis.org) and download the TAIR12 assembly. Make sure to edit the chromosome names to be in UCSC style (chr1, chr2, chr3, chr4, chr5). Parts of the pipeline require this naming sceme. Also grab (or make) a `chrom.sizes` file. Quick tip: use `samtools faidx` to make one if you can't find one.
+### Step 4: Run the pipeline
 
-### Step 4: Align the input reads to TAIR12
+```
+./submit.sh bwa                       # align inputs to TAIR12
+srun --pty bash                       # interactive session for init
+  ./scripts/init_script.sh            # generates the umap working tree
+  exit
+./submit.sh umap                      # build mappability tracks
+./submit.sh blacklist                 # produce tair12_bl_ucsc.bed and tair12_bl_ens.bed
+```
 
-Run the `bwa.sh` script to create the TAIR12 index and align the reads with `bwa`.
+`submit.sh` sources `config.sh`, validates that prerequisites exist, and calls `sbatch` with the correct partition, mail, and log paths. The `init_script.sh` step is run interactively because it's a single fast call to `ubismap.py`. The Blacklist program is built (in `defs/Blacklist.def`) with the Klasfeld et al. (2022) modification that allows merging of blacklist ranges 5 Kbp apart.
 
-### Step 5: Run UMAP to get mappability tracks
-
-Run the `init_script.sh` script using an interactive SLURM session (takes a second to finish). This will create a script called `umap_script.sh`, which is not suitable to run on the HPC. However the `init_script.sh` step also creates other necessary folders, so it must be run. Run the `umap_script_manual.sh` script instead.
-
-### Step 6: Run the Blacklist tool to create the blacklist
-
-Run the `blacklist.sh` script to generate the final blacklist files. The Blacklist program has been modified to allow for merging of blacklist ranges 5 Kbp apart, as noted in Klasfeld et al. (2022).
+Final outputs land at `$WORK_BASE/tair12_bl_ucsc.bed` and `$WORK_BASE/tair12_bl_ens.bed`.
 
 ## References
 
