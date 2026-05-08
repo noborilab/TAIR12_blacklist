@@ -8,7 +8,7 @@ There are two files: `tair12_bl_ens.bed` and `tair12_bl_ucsc.bed`. These are the
 
 Please use the Zenodo DOI to cite this blacklist if you find it useful in your research:
 
-Tremblay, B.J.M. and Nobori, T. (2026). TAIR12 blacklist. _Zenodo_, DOI: XXX.
+Tremblay, B.J.M. and Nobori, T. (2026). TAIR12 blacklist. _Zenodo_, DOI: [10.5281/zenodo.20084760](https://doi.org/10.5281/zenodo.20084759).
 
 ## TAIR10 versus TAIR12
 
