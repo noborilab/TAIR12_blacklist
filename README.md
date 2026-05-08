@@ -14,7 +14,7 @@ Tremblay, B.J.M. and Nobori, T. (2026). TAIR12 blacklist. _Zenodo_, DOI: XXX.
 
 Here is a quick visualization of the TAIR10 versus TAIR12 blacklist coverage across the 5 chromosomes (not to scale):
 
-<img src="TAIR10_vs_TAIR12.jpg" width="75%" />
+<img src="TAIR10_vs_TAIR12.jpg" width="100%" />
 
 ## Reproducing the blacklist
 
